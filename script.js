@@ -1,12 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
+    // --- TASK 8: FUNÇÕES DE PERSISTÊNCIA ---
+
+    // Função para salvar o estado atual da lista do DOM para o Local Storage
+    const saveTasksToLocalStorage = () => {
+        const tasks = [];
+        // Itera sobre todos os <li> na lista
+        document.querySelectorAll('#task-list .task-item').forEach(taskItem => {
+            const textSpan = taskItem.querySelector('.task-text');
+            if (textSpan) { // Garante que o span de texto exista
+                tasks.push({
+                    text: textSpan.textContent,
+                    done: taskItem.classList.contains('done')
+                });
+            }
+        });
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    };
+
+    // Função para carregar as tarefas do Local Storage e recriá-las no DOM
+    const loadTasksFromLocalStorage = () => {
+        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        savedTasks.forEach(task => {
+            // Reusa a lógica de criação de tarefa, mas com os dados salvos
+            const taskItem = document.createElement('li');
+            taskItem.className = `task-item ${task.done ? 'done' : 'pending'}`;
+
+            const taskTextSpan = document.createElement('span');
+            taskTextSpan.className = 'task-text';
+            taskTextSpan.textContent = task.text;
+            taskItem.appendChild(taskTextSpan);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Remover';
+            taskItem.appendChild(removeBtn);
+
+            taskList.appendChild(taskItem);
+        });
+    };
+
+    // Carrega as tarefas salvas assim que a página é carregada
+    loadTasksFromLocalStorage();
+
+    // --- LISTENERS DE EVENTOS EXISTENTES (MODIFICADOS PARA SALVAR) ---
+
     taskForm.addEventListener('submit', (event) => {
         event.preventDefault();
-
         const taskText = taskInput.value.trim();
 
         if (taskText !== '') {
@@ -24,6 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
             taskItem.appendChild(removeBtn);
 
             taskList.appendChild(taskItem);
+
+            // Limpa o input
+            taskInput.value = '';
+            taskInput.focus();
+
+            // Salva o estado após adicionar
+            saveTasksToLocalStorage();
         }
     });
     taskList.addEventListener('click', (event) => {
@@ -36,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             taskItem.classList.toggle('done');
             taskItem.classList.toggle('pending');
         }
+        // Salva o estado após remover ou marcar/desmarcar
+        saveTasksToLocalStorage();
     });
 
     taskList.addEventListener('dblclick', (event) => {
@@ -57,6 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const newText = editInput.value.trim();
             taskTextSpan.textContent = newText || currentText;
             taskItem.replaceChild(taskTextSpan, editInput);
+            // Salva o estado após editar
+            saveTasksToLocalStorage();
         };
 
         editInput.addEventListener('blur', saveChanges);
