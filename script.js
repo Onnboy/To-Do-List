@@ -18,13 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
             taskTextSpan.textContent = taskText;
             taskItem.appendChild(taskTextSpan);
 
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Remover';
+            taskItem.appendChild(removeBtn);
+
             taskList.appendChild(taskItem);
         }
     });
     taskList.addEventListener('click', (event) => {
         const taskItem = event.target.closest('.task-item');
+        if (!taskItem) return;
 
-        if (taskItem) {
+        if (event.target.classList.contains('remove-btn')) {
+            taskItem.remove();
+        } else {
             taskItem.classList.toggle('done');
             taskItem.classList.toggle('pending');
         }

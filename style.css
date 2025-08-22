@@ -44,14 +44,29 @@ h1 {
     font-size: 16px;
 }
 
-button {
+.input-section button {
     padding: 10px 15px;
     border: none;
-    background-color: #5c67f2;
+    background-color: #49c700;
     color: white;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+}
+
+.remove-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.2s;
+}
+
+.remove-btn:hover {
+    background-color: #c0392b;
 }
 
 #task-list {
