@@ -11,11 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (taskText !== '') {
             const taskItem = document.createElement('li');
-            taskItem.textContent = taskText;
-            taskList.appendChild(taskItem);
+            taskItem.className = 'task-item pending';
 
-            taskInput.value = '';
-            taskInput.focus();
+            const taskTextSpan = document.createElement('span');
+            taskTextSpan.className = 'task-text';
+            taskTextSpan.textContent = taskText;
+            taskItem.appendChild(taskTextSpan);
+
+            taskList.appendChild(taskItem);
         }
     });
 });
