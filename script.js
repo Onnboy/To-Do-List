@@ -21,5 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
             taskList.appendChild(taskItem);
         }
     });
+    taskList.addEventListener('click', (event) => {
+        const taskItem = event.target.closest('.task-item');
+
+        if (taskItem) {
+            taskItem.classList.toggle('done');
+            taskItem.classList.toggle('pending');
+        }
+    });
 });
 
