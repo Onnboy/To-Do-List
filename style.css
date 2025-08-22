@@ -95,3 +95,13 @@ h1 {
     text-decoration: line-through;
     color: #aaa;
 }
+
+/* Estilo para o campo de input quando em modo de edição */
+.edit-input {
+    flex-grow: 1;
+    font-size: 16px;
+    padding: 0;
+    border: none;
+    background: #f4f4f9; /* Um fundo sutil para indicar edição */
+    outline: none; /* Remove a borda de foco padrão */
+}

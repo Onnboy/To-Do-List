@@ -37,5 +37,34 @@ document.addEventListener('DOMContentLoaded', () => {
             taskItem.classList.toggle('pending');
         }
     });
-});
 
+    taskList.addEventListener('dblclick', (event) => {
+        const taskItem = event.target.closest('.task-item');
+        if (!taskItem || !event.target.classList.contains('task-text')) return;
+
+        const taskTextSpan = event.target;
+        const currentText = taskTextSpan.textContent;
+
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.value = currentText;
+        editInput.className = 'edit-input';
+
+        taskItem.replaceChild(editInput, taskTextSpan);
+        editInput.focus();
+
+        const saveChanges = () => {
+            const newText = editInput.value.trim();
+            taskTextSpan.textContent = newText || currentText;
+            taskItem.replaceChild(taskTextSpan, editInput);
+        };
+
+        editInput.addEventListener('blur', saveChanges);
+
+        editInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                saveChanges();
+            }
+        });
+    });
+});
