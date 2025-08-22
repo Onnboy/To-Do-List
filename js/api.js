@@ -1,25 +1,64 @@
-// Substitua esta URL pela URL real da API fornecida no seu curso.
-const API_URL = 'https://api.example.com/tasks';
+const API_URL = 'http://localhost:3000/tasks';
 
 /**
- * Busca todas as tarefas do servidor.
- * Usa async/await para lidar com a natureza assíncrona do fetch.
- * @returns {Promise<Array>} Uma promessa que resolve para um array de tarefas.
+ * @returns {Promise<Array>}
  */
 const getTasks = async () => {
     try {
-        // 1. Faz a requisição GET para a API. 'await' pausa a função até a resposta chegar.
         const response = await fetch(API_URL);
 
-        // 2. Verifica se a resposta da rede foi bem-sucedida (status 2xx).
         if (!response.ok) {
             throw new Error(`Erro na requisição: ${response.statusText}`);
         }
 
-        // 3. Converte a resposta em JSON e a retorna.
         return await response.json();
     } catch (error) {
         console.error("Falha ao buscar tarefas da API:", error);
-        return []; // Retorna um array vazio em caso de erro para não quebrar a aplicação.
+        return [];
+    }
+};
+
+/**
+ * @param {object} taskData
+ * @returns {Promise<object|null>}
+ */
+const createTask = async (taskData) => {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(taskData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro ao criar tarefa: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Falha ao criar tarefa:", error);
+        return null;
+    }
+};
+
+/**
+ * Remove uma tarefa do servidor.
+ * @param {string|number} taskId - O ID da tarefa a ser removida.
+ * @returns {Promise<boolean>} Uma promessa que resolve para `true` se a remoção for bem-sucedida, ou `false` em caso de erro.
+ */
+const deleteTask = async (taskId) => {
+    try {
+        const response = await fetch(`${API_URL}/${taskId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro ao remover tarefa: ${response.statusText}`);
+        }
+        return true; // Indica sucesso
+    } catch (error) {
+        console.error("Falha ao remover tarefa:", error);
+        return false; // Indica falha
     }
 };

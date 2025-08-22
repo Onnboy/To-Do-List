@@ -3,25 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
-    const saveTasksToLocalStorage = () => {
-        const tasks = [];
-        document.querySelectorAll('#task-list .task-item').forEach(taskItem => {
-            const textSpan = taskItem.querySelector('.task-text');
-            if (textSpan) {
-                tasks.push({
-                    text: textSpan.textContent,
-                    done: taskItem.classList.contains('done')
-                });
-            }
-        });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    };
-
     const loadTasks = async () => {
         const tasksFromAPI = await getTasks();
 
         tasksFromAPI.forEach(task => {
             const taskItem = document.createElement('li');
+            taskItem.dataset.id = task.id;
             taskItem.className = `task-item ${task.done ? 'done' : 'pending'}`;
 
             const taskTextSpan = document.createElement('span');
@@ -40,43 +27,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadTasks();
 
-    taskForm.addEventListener('submit', (event) => {
+    taskForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const taskText = taskInput.value.trim();
 
         if (taskText !== '') {
-            const taskItem = document.createElement('li');
-            taskItem.className = 'task-item pending';
+            const newTaskData = {
+                text: taskText,
+                done: false,
+            };
 
-            const taskTextSpan = document.createElement('span');
-            taskTextSpan.className = 'task-text';
-            taskTextSpan.textContent = taskText;
-            taskItem.appendChild(taskTextSpan);
+            const createdTask = await createTask(newTaskData);
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.textContent = 'Remover';
-            taskItem.appendChild(removeBtn);
+            if (createdTask) {
+                const taskItem = document.createElement('li');
+                taskItem.dataset.id = createdTask.id; 
+                taskItem.className = 'task-item pending';
 
-            taskList.appendChild(taskItem);
+                const taskTextSpan = document.createElement('span');
+                taskTextSpan.className = 'task-text';
+                taskTextSpan.textContent = createdTask.text;
+                taskItem.appendChild(taskTextSpan);
 
-            taskInput.value = '';
-            taskInput.focus();
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.textContent = 'Remover';
+                taskItem.appendChild(removeBtn);
 
-            saveTasksToLocalStorage();
+                taskList.appendChild(taskItem);
+
+                taskInput.value = '';
+                taskInput.focus();
+            }
         }
     });
-    taskList.addEventListener('click', (event) => {
+
+    taskList.addEventListener('click', async (event) => {
         const taskItem = event.target.closest('.task-item');
         if (!taskItem) return;
 
+        const taskId = taskItem.dataset.id;
+
         if (event.target.classList.contains('remove-btn')) {
-            taskItem.remove();
+            const success = await deleteTask(taskId);
+            if (success) {
+                taskItem.remove();
+            }
         } else {
             taskItem.classList.toggle('done');
             taskItem.classList.toggle('pending');
         }
-        saveTasksToLocalStorage();
     });
 
     taskList.addEventListener('dblclick', (event) => {
@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const newText = editInput.value.trim();
             taskTextSpan.textContent = newText || currentText;
             taskItem.replaceChild(taskTextSpan, editInput);
-            saveTasksToLocalStorage();
         };
 
         editInput.addEventListener('blur', saveChanges);
