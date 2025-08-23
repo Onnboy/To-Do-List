@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 done: false,
             };
 
-            const createdTask = await createTask(newTaskData);
+            const createdTask = await createdTask(newTaskData);
 
             if (createdTask) {
                 const taskItem = document.createElement('li');
@@ -74,9 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskItem.remove();
             }
         } else {
-            // Lógica para marcar como concluído e salvar na API
             const taskText = taskItem.querySelector('.task-text').textContent;
-            const newDoneStatus = !taskItem.classList.contains('done'); // Calcula o novo estado
+            const newDoneStatus = !taskItem.classList.contains('done');
 
             const dataToUpdate = {
                 text: taskText,
@@ -86,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const updatedTask = await updateTask(taskId, dataToUpdate);
 
             if (updatedTask) {
-                // Atualiza a UI somente se a API confirmar a alteração
                 taskItem.classList.toggle('done', updatedTask.done);
                 taskItem.classList.toggle('pending', !updatedTask.done);
             }
@@ -121,11 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const updatedTask = await updateTask(taskId, dataToUpdate);
 
             if (updatedTask) {
-                // Atualiza a UI com os dados retornados pela API para garantir consistência
                 taskTextSpan.textContent = updatedTask.text;
                 taskItem.replaceChild(taskTextSpan, editInput);
             } else {
-                // Se a atualização falhar, reverta para o texto original
                 taskTextSpan.textContent = currentText;
                 taskItem.replaceChild(taskTextSpan, editInput);
             }
