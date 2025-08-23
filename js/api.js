@@ -43,9 +43,8 @@ const createTask = async (taskData) => {
 };
 
 /**
- * Remove uma tarefa do servidor.
- * @param {string|number} taskId - O ID da tarefa a ser removida.
- * @returns {Promise<boolean>} Uma promessa que resolve para `true` se a remoção for bem-sucedida, ou `false` em caso de erro.
+ * @param {string|number} taskId
+ * @returns {Promise<boolean>} 
  */
 const deleteTask = async (taskId) => {
     try {
@@ -56,9 +55,34 @@ const deleteTask = async (taskId) => {
         if (!response.ok) {
             throw new Error(`Erro ao remover tarefa: ${response.statusText}`);
         }
-        return true; // Indica sucesso
+        return true;
     } catch (error) {
         console.error("Falha ao remover tarefa:", error);
-        return false; // Indica falha
+        return false;
+    }
+};
+
+/**
+ * Atualiza uma tarefa existente no servidor.
+ * @param {string|number} taskId - O ID da tarefa a ser atualizada.
+ * @param {object} updateData - O objeto completo da tarefa com os dados atualizados.
+ * @returns {Promise<object|null>} Uma promessa que resolve para o objeto da tarefa atualizada ou null em caso de erro.
+ */
+const updateTask = async (taskId, updateData) => {
+    try {
+        const response = await fetch(`${API_URL}/${taskId}`, {
+            method: 'PUT', // PUT substitui o recurso inteiro com os novos dados
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+        });
+        if (!response.ok) {
+            throw new Error(`Erro ao atualizar tarefa: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Falha ao atualizar tarefa:", error);
+        return null;
     }
 };
