@@ -3,24 +3,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
+        const createTaskElement = (task) => {
+        const taskItem = document.createElement('li');
+        taskItem.dataset.id = task.id;
+        taskItem.className = `task-item ${task.done ? 'done' : 'pending'}`;
+
+        const taskTextSpan = document.createElement('span');
+        taskTextSpan.className = 'task-text';
+        taskTextSpan.textContent = task.text;
+        taskItem.appendChild(taskTextSpan);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Remover';
+        taskItem.appendChild(removeBtn);
+
+        return taskItem;
+    };    
+    
     const loadTasks = async () => {
         const tasksFromAPI = await getTasks();
 
         tasksFromAPI.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.dataset.id = task.id;
-            taskItem.className = `task-item ${task.done ? 'done' : 'pending'}`;
-
-            const taskTextSpan = document.createElement('span');
-            taskTextSpan.className = 'task-text';
-            taskTextSpan.textContent = task.text;
-            taskItem.appendChild(taskTextSpan);
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.textContent = 'Remover';
-            taskItem.appendChild(removeBtn);
-
+            const taskItem = createTaskElement(task);
             taskList.appendChild(taskItem);
         });
     };
@@ -37,23 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 done: false,
             };
 
-            const createdTask = await createdTask(newTaskData);
+            const createdTask = await createTask(newTaskData);
 
             if (createdTask) {
-                const taskItem = document.createElement('li');
-                taskItem.dataset.id = createdTask.id; 
-                taskItem.className = 'task-item pending';
-
-                const taskTextSpan = document.createElement('span');
-                taskTextSpan.className = 'task-text';
-                taskTextSpan.textContent = createdTask.text;
-                taskItem.appendChild(taskTextSpan);
-
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-btn';
-                removeBtn.textContent = 'Remover';
-                taskItem.appendChild(removeBtn);
-
+                const taskItem = createTaskElement(createdTask);
                 taskList.appendChild(taskItem);
 
                 taskInput.value = '';
