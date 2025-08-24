@@ -98,7 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
         taskItem.replaceChild(editInput, taskTextSpan);
         editInput.focus();
 
+        let isSaving = false;
+
         const saveChanges = async () => {
+            if (isSaving) return;
+            isSaving = true;
+
             const newText = editInput.value.trim();
             const isDone = taskItem.classList.contains('done');
             const taskId = taskItem.dataset.id;
