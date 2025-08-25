@@ -2,134 +2,133 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
+    const taskCounter = document.getElementById('task-counter');
 
-        const createTaskElement = (task) => {
-        const taskItem = document.createElement('li');
-        taskItem.dataset.id = task.id;
-        taskItem.className = `task-item ${task.done ? 'done' : 'pending'}`;
 
-        const taskTextSpan = document.createElement('span');
-        taskTextSpan.className = 'task-text';
-        taskTextSpan.textContent = task.text;
-        taskItem.appendChild(taskTextSpan);
+    const updateTaskCounter = () => {
+        const totalTasks = tasksState.length;
+        const pendingTasks = tasksState.filter(task => !task.done).length;
+
+        if (totalTasks === 0) {
+            taskCounter.textContent = 'Nenhuma tarefa na lista.';
+        } else {
+            taskCounter.textContent = `${pendingTasks} pendente(s) de ${totalTasks} no total`;
+        }
+    };
+
+    const renderAllTasks = () => {
+        taskList.innerHTML = '';
+        tasksState.forEach(task => {
+            const taskElement = createTaskElement(task);
+            taskList.appendChild(taskElement);
+        });
+        updateTaskCounter();
+    };
+
+    /**
+     * @param {object} task
+     * @returns {HTMLElement}
+     */
+    const createTaskElement = (task) => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.dataset.id = task.id;
+        if (task.done) {
+            li.classList.add('done');
+        }
+
+        const span = document.createElement('span');
+        span.className = 'task-text';
+        span.textContent = task.text;
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.textContent = 'Remover';
-        taskItem.appendChild(removeBtn);
 
-        return taskItem;
-    };    
-    
-    const loadTasks = async () => {
-        const tasksFromAPI = await getTasks();
+        li.appendChild(span);
+        li.appendChild(removeBtn);
 
-        tasksFromAPI.forEach(task => {
-            const taskItem = createTaskElement(task);
-            taskList.appendChild(taskItem);
-        });
+        return li;
     };
 
-    loadTasks();
+    const initializeApp = async () => {
+        tasksState = await getTasks();
+        renderAllTasks();
+    };
 
-    taskForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const taskText = taskInput.value.trim();
+    const handleAddTask = async (e) => {
+        e.preventDefault();
+        const text = taskInput.value.trim();
+        if (!text) return;
 
-        if (taskText !== '') {
-            const newTaskData = {
-                text: taskText,
-                done: false,
-            };
-
-            const createdTask = await createTask(newTaskData);
-
-            if (createdTask) {
-                const taskItem = createTaskElement(createdTask);
-                taskList.appendChild(taskItem);
-
-                taskInput.value = '';
-                taskInput.focus();
-            }
+        const createdTask = await createTask({ text, done: false });
+        if (createdTask) {
+            tasksState.push(createdTask);
+            renderAllTasks();
+            taskInput.value = '';
+            taskInput.focus();
         }
-    });
+    };
 
-    taskList.addEventListener('click', async (event) => {
-        const taskItem = event.target.closest('.task-item');
-        if (!taskItem) return;
+    const handleListClick = async (e) => {
+        const taskElement = e.target.closest('.task-item');
+        if (!taskElement) return;
 
-        const taskId = taskItem.dataset.id;
+        const taskId = taskElement.dataset.id;
+        const task = tasksState.find(t => t.id === taskId);
+        if (!task) return;
 
-        if (event.target.classList.contains('remove-btn')) {
+        if (e.target.classList.contains('remove-btn')) {
             const success = await deleteTask(taskId);
             if (success) {
-                taskItem.remove();
+                tasksState = tasksState.filter(t => t.id !== taskId);
+                renderAllTasks();
             }
-        } else {
-            const taskText = taskItem.querySelector('.task-text').textContent;
-            const newDoneStatus = !taskItem.classList.contains('done');
-
-            const dataToUpdate = {
-                text: taskText,
-                done: newDoneStatus,
-            };
-
-            const updatedTask = await updateTask(taskId, dataToUpdate);
-
+        } else if (e.target.classList.contains('task-text')) {
+            const updatedTaskData = { ...task, done: !task.done };
+            const updatedTask = await updateTask(taskId, updatedTaskData);
             if (updatedTask) {
-                taskItem.classList.toggle('done', updatedTask.done);
-                taskItem.classList.toggle('pending', !updatedTask.done);
+                const taskIndex = tasksState.findIndex(t => t.id === taskId);
+                tasksState[taskIndex] = updatedTask;
+                renderAllTasks();
             }
         }
-    });
+    };
 
-    taskList.addEventListener('dblclick', async (event) => {
-        const taskItem = event.target.closest('.task-item');
-        if (!taskItem || !event.target.classList.contains('task-text')) return;
+    const handleListDoubleClick = (e) => {
+        const span = e.target;
+        if (!span.classList.contains('task-text')) return;
 
-        const taskTextSpan = event.target;
-        const currentText = taskTextSpan.textContent;
+        const taskElement = span.closest('.task-item');
+        const originalText = span.textContent;
 
-        const editInput = document.createElement('input');
-        editInput.type = 'text';
-        editInput.value = currentText;
-        editInput.className = 'edit-input';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-input';
+        input.value = originalText;
 
-        taskItem.replaceChild(editInput, taskTextSpan);
-        editInput.focus();
-
-        let isSaving = false;
+        span.replaceWith(input);
+        input.focus();
 
         const saveChanges = async () => {
-            if (isSaving) return;
-            isSaving = true;
+            const newText = input.value.trim();
+            const taskId = taskElement.dataset.id;
+            const task = tasksState.find(t => t.id === taskId);
 
-            const newText = editInput.value.trim();
-            const isDone = taskItem.classList.contains('done');
-            const taskId = taskItem.dataset.id;
-
-            const dataToUpdate = {
-                text: newText || currentText,
-                done: isDone,
-            };
-
-            const updatedTask = await updateTask(taskId, dataToUpdate);
-
-            if (updatedTask) {
-                taskTextSpan.textContent = updatedTask.text;
-                taskItem.replaceChild(taskTextSpan, editInput);
-            } else {
-                taskTextSpan.textContent = currentText;
-                taskItem.replaceChild(taskTextSpan, editInput);
+            if (newText && newText !== originalText && task) {
+                const updatedTask = await updateTask(taskId, { ...task, text: newText });
+                tasksState = tasksState.map(t => t.id === taskId ? updatedTask : t);
             }
+            renderAllTasks();
         };
 
-        editInput.addEventListener('blur', saveChanges);
+        input.addEventListener('blur', saveChanges);
+        input.addEventListener('keydown', (event) => event.key === 'Enter' && input.blur());
+    };
 
-        editInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                saveChanges();
-            }
-        });
-    });
+    taskForm.addEventListener('submit', handleAddTask);
+    taskList.addEventListener('click', handleListClick);
+    taskList.addEventListener('dblclick', handleListDoubleClick);
+
+    initializeApp();
 });
