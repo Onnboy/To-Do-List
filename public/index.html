@@ -18,9 +18,16 @@
             <input type="text" id="task-input" placeholder="Adicione uma nova tarefa..." required>
             <button type="submit">Adicionar</button>
         </form>
-        <ul id="task-list">
-            
-        </ul>
+        <div id="kanban-board" class="kanban-board">
+            <div class="kanban-column" id="todo-column">
+                <h2>A Fazer</h2>
+                <ul id="todo-list" class="task-list"></ul>
+            </div>
+            <div class="kanban-column" id="done-column">
+                <h2>Concluídas</h2>
+                <ul id="done-list" class="task-list"></ul>
+            </div>
+        </div>
     </main>
 
     <script src="js/api.js"></script>

@@ -63,15 +63,14 @@ const deleteTask = async (taskId) => {
 };
 
 /**
- * Atualiza uma tarefa existente no servidor.
- * @param {string|number} taskId - O ID da tarefa a ser atualizada.
- * @param {object} updateData - O objeto completo da tarefa com os dados atualizados.
- * @returns {Promise<object|null>} Uma promessa que resolve para o objeto da tarefa atualizada ou null em caso de erro.
+ * @param {string|number} taskId 
+ * @param {object} updateData 
+ * @returns {Promise<object|null>} 
  */
 const updateTask = async (taskId, updateData) => {
     try {
         const response = await fetch(`${API_URL}/${taskId}`, {
-            method: 'PUT', // PUT substitui o recurso inteiro com os novos dados
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },

@@ -1,10 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
-    const taskList = document.getElementById('task-list');
+    const todoList = document.getElementById('todo-list');
     const taskCounter = document.getElementById('task-counter');
+    const doneList = document.getElementById('done-list');
+    const kanbanBoard = document.getElementById('kanban-board');
 
-
+    let tasksState = [];
+    
     const updateTaskCounter = () => {
         const totalTasks = tasksState.length;
         const pendingTasks = tasksState.filter(task => !task.done).length;
@@ -17,10 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderAllTasks = () => {
-        taskList.innerHTML = '';
+        todoList.innerHTML = '';
+        doneList.innerHTML = '';
+
         tasksState.forEach(task => {
             const taskElement = createTaskElement(task);
-            taskList.appendChild(taskElement);
+            if (task.done) {
+                doneList.appendChild(taskElement);
+            } else {
+                todoList.appendChild(taskElement);
+            }
         });
         updateTaskCounter();
     };
@@ -70,44 +79,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const handleListClick = async (e) => {
+    const handleListClick = (e) => {
         const taskElement = e.target.closest('.task-item');
         if (!taskElement) return;
 
-        const taskId = taskElement.dataset.id;
-        const task = tasksState.find(t => t.id === taskId);
-        if (!task) return;
-
         if (e.target.classList.contains('remove-btn')) {
-            const success = await deleteTask(taskId);
-            if (success) {
-                tasksState = tasksState.filter(t => t.id !== taskId);
-                renderAllTasks();
-            }
+            // Ação de remover é imediata
+            const taskId = taskElement.dataset.id;
+            deleteTask(taskId).then(success => {
+                if (success) {
+                    tasksState = tasksState.filter(t => t.id !== taskId);
+                    renderAllTasks();
+                }
+            });
         } else if (e.target.classList.contains('task-text')) {
-            const updatedTaskData = { ...task, done: !task.done };
-            const updatedTask = await updateTask(taskId, updatedTaskData);
-            if (updatedTask) {
-                const taskIndex = tasksState.findIndex(t => t.id === taskId);
-                tasksState[taskIndex] = updatedTask;
-                renderAllTasks();
+            // Lógica para diferenciar clique simples de duplo
+            const clicks = parseInt(taskElement.dataset.clicks || '0', 10) + 1;
+            taskElement.dataset.clicks = clicks;
+
+            if (clicks === 1) {
+                setTimeout(() => {
+                    if (taskElement.dataset.clicks === '1') {
+                        // Ação de clique simples (marcar/desmarcar)
+                        const taskId = taskElement.dataset.id;
+                        const task = tasksState.find(t => t.id === taskId);
+                        if (task) {
+                            const updatedTaskData = { ...task, done: !task.done };
+                            updateTask(taskId, updatedTaskData).then(updatedTask => {
+                                if (updatedTask) {
+                                    tasksState = tasksState.map(t => t.id === taskId ? updatedTask : t);
+                                    renderAllTasks();
+                                }
+                            });
+                        }
+                    }
+                    delete taskElement.dataset.clicks;
+                }, 250); // Atraso para esperar por um possível segundo clique
+            } else if (clicks === 2) {
+                // Ação de clique duplo (editar)
+                delete taskElement.dataset.clicks;
+                handleDoubleClickEdit(e.target);
             }
         }
     };
 
-    const handleListDoubleClick = (e) => {
-        const span = e.target;
-        if (!span.classList.contains('task-text')) return;
-
-        const taskElement = span.closest('.task-item');
-        const originalText = span.textContent;
+    const handleDoubleClickEdit = (spanElement) => {
+        const taskElement = spanElement.closest('.task-item');
+        const originalText = spanElement.textContent;
 
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'edit-input';
         input.value = originalText;
 
-        span.replaceWith(input);
+        spanElement.replaceWith(input);
         input.focus();
 
         const saveChanges = async () => {
@@ -127,8 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     taskForm.addEventListener('submit', handleAddTask);
-    taskList.addEventListener('click', handleListClick);
-    taskList.addEventListener('dblclick', handleListDoubleClick);
+    kanbanBoard.addEventListener('click', handleListClick);
 
     initializeApp();
 });

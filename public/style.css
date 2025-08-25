@@ -17,7 +17,7 @@ body {
 
 .todo-app {
     width: 100%;
-    max-width: 500px;
+    max-width: 800px;
     background: #fff;
     padding: 25px;
     border-radius: 8px;
@@ -76,21 +76,49 @@ h1 {
     background-color: #c0392b;
 }
 
-#task-list {
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.kanban-column {
+    flex: 1;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.kanban-column:nth-of-type(1) {
+    background-color: #a8d3ff;
+}
+
+.kanban-column:nth-of-type(2) {
+    background-color: #71ffa0;
+}
+
+.kanban-column h2 {
+    text-align: center;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.task-list {
     list-style-type: none;
+    min-height: 100px;
 }
 
 .task-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 5px;
-    border-bottom: 1px solid #eee;
+    padding: 12px;
+    background-color: #fff;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
     transition: background-color 0.2s;
-}
-
-.task-item:last-child {
-    border-bottom: none;
 }
 
 .task-item .task-text {
@@ -103,12 +131,12 @@ h1 {
     color: #aaa;
 }
 
-/* Estilo para o campo de input quando em modo de edição */
+
 .edit-input {
     flex-grow: 1;
     font-size: 16px;
     padding: 0;
     border: none;
-    background: #f4f4f9; /* Um fundo sutil para indicar edição */
-    outline: none; /* Remove a borda de foco padrão */
+    background: #f4f4f9;
+    outline: none;
 }
