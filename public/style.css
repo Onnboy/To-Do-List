@@ -4,10 +4,40 @@
     box-sizing: border-box;
 }
 
+:root {
+    --bg-color: #f4f4f9;
+    --app-bg-color: #fff;
+    --text-color: #333;
+    --header-color: #4a4a4a;
+    --subtle-text-color: #666;
+    --border-color: #ddd;
+    --task-bg-color: #fff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --col-todo-bg: #a8d3ff;
+    --col-done-bg: #71ffa0;
+    --done-text-color: #aaa;
+    --edit-input-bg: #f4f4f9;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --app-bg-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-color: #f5f5f5;
+    --subtle-text-color: #a0a0a0;
+    --border-color: #444;
+    --task-bg-color: #2c2c2c;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --col-todo-bg: #003973;
+    --col-done-bg: #157035;
+    --done-text-color: #777;
+    --edit-input-bg: #333;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -18,22 +48,60 @@ body {
 .todo-app {
     width: 100%;
     max-width: 800px;
-    background: #fff;
+    background: var(--app-bg-color);
     padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+header {
+    position: relative;
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
-    color: #4a4a4a;
+    color: var(--header-color);
+}
+
+.theme-switcher {
+    position: absolute;
+    top: -5px;
+    right: 0;
+}
+
+.theme-toggle-checkbox {
+    display: none;
+}
+
+.theme-toggle-label {
+    display: block;
+    width: 50px;
+    height: 26px;
+    background-color: #ccc;
+    border-radius: 13px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.theme-toggle-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s ease;
 }
 
 .task-counter {
     text-align: center;
     margin-bottom: 20px;
-    color: #666;
+    color: var(--subtle-text-color);
     font-size: 16px;
 }
 
@@ -46,9 +114,11 @@ h1 {
 #task-input {
     flex-grow: 1;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 16px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
 }
 
 .input-section button {
@@ -89,11 +159,11 @@ h1 {
 }
 
 .kanban-column:nth-of-type(1) {
-    background-color: #a8d3ff;
+    background-color: var(--col-todo-bg);
 }
 
 .kanban-column:nth-of-type(2) {
-    background-color: #71ffa0;
+    background-color: var(--col-done-bg);
 }
 
 .kanban-column h2 {
@@ -114,10 +184,10 @@ h1 {
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background-color: #fff;
+    background-color: var(--task-bg-color);
     border-radius: 5px;
     margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    box-shadow: 0 2px 4px var(--shadow-color);
     transition: background-color 0.2s;
 }
 
@@ -128,15 +198,23 @@ h1 {
 
 .task-item.done .task-text {
     text-decoration: line-through;
-    color: #aaa;
+    color: var(--done-text-color);
 }
 
+.theme-toggle-checkbox:checked + .theme-toggle-label {
+    background-color: #3f3f3fda;
+}
+
+.theme-toggle-checkbox:checked + .theme-toggle-label::before {
+    transform: translateX(24px);
+}
 
 .edit-input {
     flex-grow: 1;
     font-size: 16px;
     padding: 0;
     border: none;
-    background: #f4f4f9;
+    background: var(--edit-input-bg);
     outline: none;
+    color: var(--text-color);
 }
