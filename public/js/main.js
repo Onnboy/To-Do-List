@@ -5,8 +5,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskCounter = document.getElementById('task-counter');
     const doneList = document.getElementById('done-list');
     const kanbanBoard = document.getElementById('kanban-board');
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
 
     let tasksState = [];
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggle.checked = true;
+        } else {
+            body.classList.remove('dark-mode');
+            themeToggle.checked = false;
+        }
+    };
+
+    themeToggle.addEventListener('change', () => {
+        const newTheme = themeToggle.checked ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
     
     const updateTaskCounter = () => {
         const totalTasks = tasksState.length;
@@ -86,12 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('remove-btn')) {
             // Ação de remover é imediata
             const taskId = taskElement.dataset.id;
-            deleteTask(taskId).then(success => {
-                if (success) {
-                    tasksState = tasksState.filter(t => t.id !== taskId);
-                    renderAllTasks();
-                }
-            });
+            if (window.confirm('Tem certeza que deseja remover esta tarefa?')) {
+                deleteTask(taskId).then(success => {
+                    if (success) {
+                        tasksState = tasksState.filter(t => t.id !== taskId);
+                        renderAllTasks();
+                    }
+                });
+            }
         } else if (e.target.classList.contains('task-text')) {
             // Lógica para diferenciar clique simples de duplo
             const clicks = parseInt(taskElement.dataset.clicks || '0', 10) + 1;
