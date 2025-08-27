@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const kanbanBoard = document.getElementById('kanban-board');
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
+    const loader = document.getElementById('loader');
 
     let tasksState = [];
 
@@ -52,6 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 todoList.appendChild(taskElement);
             }
         });
+
+        if (todoList.children.length === 0) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.className = 'empty-state-message';
+            emptyMessage.textContent = 'Nenhuma tarefa pendente!';
+            todoList.appendChild(emptyMessage);
+        }
+        if (doneList.children.length === 0) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.className = 'empty-state-message';
+            emptyMessage.textContent = 'Nenhuma tarefa concluída.';
+            doneList.appendChild(emptyMessage);
+        }
         updateTaskCounter();
     };
 
@@ -74,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.textContent = 'Remover';
+        removeBtn.setAttribute('aria-label', `Remover a tarefa: ${task.text}`);
 
         li.appendChild(span);
         li.appendChild(removeBtn);
@@ -82,8 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const initializeApp = async () => {
+        loader.style.display = 'block';
+        kanbanBoard.style.display = 'none';
         tasksState = await getTasks();
         renderAllTasks();
+        loader.style.display = 'none';
+        kanbanBoard.style.display = 'flex';
     };
 
     const handleAddTask = async (e) => {
@@ -105,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!taskElement) return;
 
         if (e.target.classList.contains('remove-btn')) {
-            // Ação de remover é imediata
             const taskId = taskElement.dataset.id;
             if (window.confirm('Tem certeza que deseja remover esta tarefa?')) {
                 deleteTask(taskId).then(success => {
@@ -116,14 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } else if (e.target.classList.contains('task-text')) {
-            // Lógica para diferenciar clique simples de duplo
             const clicks = parseInt(taskElement.dataset.clicks || '0', 10) + 1;
             taskElement.dataset.clicks = clicks;
 
             if (clicks === 1) {
                 setTimeout(() => {
                     if (taskElement.dataset.clicks === '1') {
-                        // Ação de clique simples (marcar/desmarcar)
                         const taskId = taskElement.dataset.id;
                         const task = tasksState.find(t => t.id === taskId);
                         if (task) {
@@ -137,9 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     delete taskElement.dataset.clicks;
-                }, 250); // Atraso para esperar por um possível segundo clique
+                }, 250);
             } else if (clicks === 2) {
-                // Ação de clique duplo (editar)
                 delete taskElement.dataset.clicks;
                 handleDoubleClickEdit(e.target);
             }
@@ -154,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.type = 'text';
         input.className = 'edit-input';
         input.value = originalText;
+        input.id = `edit-input-${taskElement.dataset.id}`;
 
         spanElement.replaceWith(input);
         input.focus();
