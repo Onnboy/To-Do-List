@@ -19,7 +19,8 @@
             <div id="task-counter" class="task-counter"></div>
         </header>
         <form id="task-form" class="input-section">
-            <input type="text" id="task-input" placeholder="Adicione uma nova tarefa..." required>
+            <label for="task-input" class="sr-only">Nova tarefa</label>
+            <input type="text" id="task-input" placeholder="Adicione uma nova tarefa..." required autocomplete="off">
             <button type="submit">Adicionar</button>
         </form>
         <div id="kanban-board" class="kanban-board">
@@ -32,6 +33,7 @@
                 <ul id="done-list" class="task-list"></ul>
             </div>
         </div>
+        <div id="loader" class="loader"></div>
     </main>
 
     <script src="js/api.js"></script>
